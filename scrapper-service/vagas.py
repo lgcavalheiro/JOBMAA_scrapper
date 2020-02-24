@@ -23,21 +23,11 @@ def scrape_page(root, scrape_params):
 
 
 def get_wage(target):
-    wage = ""
+    wage = []
     for element in target.iter("p", "ul", "strong", "li", "b", "span"):
-        if element.text is not None and element.values() != 'info-localizacao':
-            wage += " " + element.text
+        if element.text is not None and 'info-localizacao' not in element.values():
+            wage.append(" " + element.text.strip() + " ")
     return wage
-    """ for child1 in target:
-        if child1.tag == "ul":
-            for child2 in child1:
-                if child2.tag == "li":
-                    for child3 in child2:
-                        if child3.tag == "div":
-                            for child4 in child3:
-                                if child4.tag == "span":
-                                    if child4.getchildren():
-                                        return child4.text """
 
 
 def get_description(root, target):
