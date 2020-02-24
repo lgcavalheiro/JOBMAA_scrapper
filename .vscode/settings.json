@@ -1,8 +1,0 @@
-{
-    "editor.formatOnSave": true,
-    "code-runner.executorMap": {
-        "python": "$pythonPath -u $fullFileName"
-    },
-    "code-runner.showExecutionMessage": false,
-    "code-runner.clearPreviousOutput": true
-}
