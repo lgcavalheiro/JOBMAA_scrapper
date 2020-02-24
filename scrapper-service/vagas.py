@@ -23,7 +23,13 @@ def scrape_page(root, scrape_params):
 
 
 def get_wage(target):
-    for child1 in target:
+    wage = ""
+    for element in target.iter("p", "ul", "strong", "li", "b", "span"):
+        if element.text is not None:
+            print(element.attrib)
+            wage += " " + element.text
+    return wage
+    """ for child1 in target:
         if child1.tag == "ul":
             for child2 in child1:
                 if child2.tag == "li":
@@ -31,7 +37,8 @@ def get_wage(target):
                         if child3.tag == "div":
                             for child4 in child3:
                                 if child4.tag == "span":
-                                    return child4.text
+                                    if child4.getchildren():
+                                        return child4.text """
 
 
 def get_description(root, target):
@@ -81,7 +88,7 @@ def scrape_job_info(target_links):
                 root,
                 '//li[@class="job-hierarchylist__item job-hierarchylist__item--level"]/@aria-label',
             ),
-            "wage": get_wage(scrape_page(root, '//ul[@class="clearfix"]')),
+            "wage": get_wage(scrape_page(root, '//ul[@class="clearfix"]')[0]),
             "location": scrape_page(root, '//span[@class="info-localizacao"]/@title'),
             "job_description": get_description(root, '//div[@class="texto"]'),
             "job_benefits": get_benefits(root),
