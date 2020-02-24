@@ -25,8 +25,7 @@ def scrape_page(root, scrape_params):
 def get_wage(target):
     wage = ""
     for element in target.iter("p", "ul", "strong", "li", "b", "span"):
-        if element.text is not None:
-            print(element.attrib)
+        if element.text is not None and element.values() != 'info-localizacao':
             wage += " " + element.text
     return wage
     """ for child1 in target:
