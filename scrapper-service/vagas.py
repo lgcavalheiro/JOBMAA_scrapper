@@ -36,37 +36,43 @@ def get_wage(target):
 
 def get_description(root, target):
     el1 = scrape_page(root, target)[0]
-    el2 = scrape_page(el1, ".//*")
-    # print(iterate(el1))
-    description = iterate(el1)
-    # print(description)
-    """ for child in el2:
-        if str(child.text) != "None":
-            description += str(child.text) """
-    return description
-
-
-def iterate(target):
     description = ""
-    for child in target.getchildren():
-        if len(child.getchildren()) > 0:
-            print("DESC BEFORE: ", description)
-            description += iterate(child)
-            print("DESC AFTER: ", description)
-        if str(child.text) != "None":
-            return child.text
+    for element in el1.iter("p", "ul", "strong", "li"):
+        if element.text is not None and element.itertext() and type(element) is not list:
+            for i in element.itertext():
+                print(i)
+        if (
+            element.text is not None
+            and type(element) is not list
+            and str(element.text).lower().find("benefício") == -1
+        ):
+            description += element.text
+        if (
+            type(element)
+            is list
+            # and str(type(element[0])) == "<class 'lxml.etree._ElementUnicodeResult'>"
+        ):
+            print("HIIIIIT!111111111111")
+            for item in element:
+                print("HIIIIIIIIIIIIIIIIT22222222222", item)
+                description += item
+        elif str(element.text).lower().find("benefício") > -1:
+            break
     return description
 
 
 def get_benefits(root):
     article = scrape_page(root, '//article[@class="vaga"]')[0]
-    ul = scrape_page(article, ".//ul")
     benefits = ""
-    for child in ul:
-        for c in child:
-            temp = c.text.replace("\n", "").strip()
-            if len(temp) <= 40:
-                benefits += " " + temp
+    found = False
+    for element in article.iter("p", "ul", "strong", "li", "br"):
+        if str(element.text).lower().find("benefício") > -1:
+            found = True
+        if found and element.text is not None:
+            if element.tag == "p":
+                break
+            else:
+                benefits += " " + element.text.replace("\n", "").strip()
     return benefits
 
 
@@ -99,6 +105,7 @@ def scrape_job_info(target_links):
                 temp_info[value] = temp.join(temp_info[value])
             temp_info[value] = temp_info[value].replace("\n", "").strip()
         job_oportunities.append(temp_info)
+        # break
     return job_oportunities
 
 
@@ -109,10 +116,23 @@ def write_to_json(data_dict):
 
 def main_handler():
     url = "https://www.vagas.com.br/vagas-de-desenvolvedor-em-rio-de-janeiro"
-    root = root_request(url)
-    target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
+    # root = root_request(url)
+    """ root = root_request(
+        "https://www.vagas.com.br/vagas/v2026147/desenvolvedor-ios-junior"
+    )
+    waa = scrape_page(root, '//*[@id="conteudoVaga"]/span/article/div[1]/p[2]/text()')
+    print(str(type(waa[0])))
+    if (
+        type(waa) is list
+        and str(type(waa[0])) == "<class 'lxml.etree._ElementUnicodeResult'>"
+    ):
+        for item in waa:
+            print(item, len(waa), type(waa)) """
+    """ target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
     job_oportunities = scrape_job_info(target_links)
-    write_to_json(job_oportunities)
+    write_to_json(job_oportunities) """
+    print(scrape_job_info(["/vagas/v2026147/desenvolvedor-ios-junior"]))
 
 
 main_handler()
+
