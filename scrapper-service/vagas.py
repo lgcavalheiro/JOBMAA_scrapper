@@ -1,14 +1,118 @@
 import sys
 
 import requests
-from lxml.etree import HTML
+import json
+from lxml.etree import HTML, tostring
+from lxml import etree
+from datetime import datetime
+from itertools import chain
 
-print(sys.version)
-print(sys.executable)
+console_caller = "[VAGAS.PY]"
 
-r = requests.get("https://google.com")
-print(r.status_code)
-root = HTML(r.content)
-test = root.xpath('//a/@alt="last pagee"')
 
-test_input = input("TEST; ")
+def root_request(url):
+    r = requests.get(url)
+    print(f"{console_caller} Requested: {r.url} - Status code: {r.status_code}")
+    root = HTML(r.content)
+    return root
+
+
+def scrape_page(root, scrape_params):
+    target_links = root.xpath(scrape_params)
+    return target_links
+
+
+def get_wage(target):
+    for child1 in target:
+        if child1.tag == "ul":
+            for child2 in child1:
+                if child2.tag == "li":
+                    for child3 in child2:
+                        if child3.tag == "div":
+                            for child4 in child3:
+                                if child4.tag == "span":
+                                    return child4.text
+
+
+def get_description(root, target):
+    el1 = scrape_page(root, target)[0]
+    el2 = scrape_page(el1, ".//*")
+    # print(iterate(el1))
+    description = iterate(el1)
+    # print(description)
+    """ for child in el2:
+        if str(child.text) != "None":
+            description += str(child.text) """
+    return description
+
+
+def iterate(target):
+    description = ""
+    for child in target.getchildren():
+        if len(child.getchildren()) > 0:
+            print("DESC BEFORE: ", description)
+            description += iterate(child)
+            print("DESC AFTER: ", description)
+        if str(child.text) != "None":
+            return child.text
+    return description
+
+
+def get_benefits(root):
+    article = scrape_page(root, '//article[@class="vaga"]')[0]
+    ul = scrape_page(article, ".//ul")
+    benefits = ""
+    for child in ul:
+        for c in child:
+            temp = c.text.replace("\n", "").strip()
+            if len(temp) <= 40:
+                benefits += " " + temp
+    return benefits
+
+
+def scrape_job_info(target_links):
+    job_oportunities = []
+    for target in target_links:
+        root = root_request(f"https://www.vagas.com.br{target}")
+        temp_info = {
+            "company_name": scrape_page(
+                root, '//h2[@class="job-shortdescription__company"]/text()'
+            ),
+            "job_title": scrape_page(
+                root, '//h1[@class="job-shortdescription__title"]/text()'
+            ),
+            "job_hierarchy": scrape_page(
+                root,
+                '//li[@class="job-hierarchylist__item job-hierarchylist__item--level"]/@aria-label',
+            ),
+            "wage": get_wage(scrape_page(root, '//ul[@class="clearfix"]')),
+            "location": scrape_page(root, '//span[@class="info-localizacao"]/@title'),
+            "job_description": get_description(root, '//div[@class="texto"]'),
+            "job_benefits": get_benefits(root),
+            "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "source_url": f"https://www.vagas.com.br{target}",
+            "source_site": "VAGAS.COM",
+        }
+        for value in temp_info:
+            if type(temp_info[value]) is list:
+                temp = ""
+                temp_info[value] = temp.join(temp_info[value])
+            temp_info[value] = temp_info[value].replace("\n", "").strip()
+        job_oportunities.append(temp_info)
+    return job_oportunities
+
+
+def write_to_json(data_dict):
+    with open("results.json", "w") as outfile:
+        json.dump(data_dict, outfile, indent=4, ensure_ascii=False)
+
+
+def main_handler():
+    url = "https://www.vagas.com.br/vagas-de-desenvolvedor-em-rio-de-janeiro"
+    root = root_request(url)
+    target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
+    job_oportunities = scrape_job_info(target_links)
+    write_to_json(job_oportunities)
+
+
+main_handler()
