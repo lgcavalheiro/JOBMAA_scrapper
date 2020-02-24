@@ -38,24 +38,14 @@ def get_description(root, target):
     el1 = scrape_page(root, target)[0]
     description = ""
     for element in el1.iter("p", "ul", "strong", "li"):
-        if element.text is not None and element.itertext() and type(element) is not list:
-            for i in element.itertext():
-                print(i)
         if (
             element.text is not None
+            and element.itertext()
             and type(element) is not list
             and str(element.text).lower().find("benefício") == -1
         ):
-            description += element.text
-        if (
-            type(element)
-            is list
-            # and str(type(element[0])) == "<class 'lxml.etree._ElementUnicodeResult'>"
-        ):
-            print("HIIIIIT!111111111111")
-            for item in element:
-                print("HIIIIIIIIIIIIIIIIT22222222222", item)
-                description += item
+            for i in element.itertext():
+                description += i
         elif str(element.text).lower().find("benefício") > -1:
             break
     return description
@@ -116,22 +106,10 @@ def write_to_json(data_dict):
 
 def main_handler():
     url = "https://www.vagas.com.br/vagas-de-desenvolvedor-em-rio-de-janeiro"
-    # root = root_request(url)
-    """ root = root_request(
-        "https://www.vagas.com.br/vagas/v2026147/desenvolvedor-ios-junior"
-    )
-    waa = scrape_page(root, '//*[@id="conteudoVaga"]/span/article/div[1]/p[2]/text()')
-    print(str(type(waa[0])))
-    if (
-        type(waa) is list
-        and str(type(waa[0])) == "<class 'lxml.etree._ElementUnicodeResult'>"
-    ):
-        for item in waa:
-            print(item, len(waa), type(waa)) """
-    """ target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
+    root = root_request(url)
+    target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
     job_oportunities = scrape_job_info(target_links)
-    write_to_json(job_oportunities) """
-    print(scrape_job_info(["/vagas/v2026147/desenvolvedor-ios-junior"]))
+    write_to_json(job_oportunities)
 
 
 main_handler()
