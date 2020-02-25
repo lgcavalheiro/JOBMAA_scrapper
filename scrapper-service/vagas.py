@@ -71,6 +71,7 @@ def scrape_job_info(target_links):
             "company_name": scrape_page(
                 root, '//h2[@class="job-shortdescription__company"]/text()'
             ),
+            "identifier": target.split('/')[2],
             "job_title": scrape_page(
                 root, '//h1[@class="job-shortdescription__title"]/text()'
             ),
@@ -91,7 +92,8 @@ def scrape_job_info(target_links):
             if type(temp_info[value]) is list:
                 temp = ""
                 temp_info[value] = temp.join(temp_info[value])
-            temp_info[value] = temp_info[value].replace("\n", "").strip()
+            temp_info[value] = temp_info[value].replace(
+                "\n", "").replace("\r", "").strip()
         job_oportunities.append(temp_info)
         # break
     return job_oportunities
@@ -103,7 +105,7 @@ def write_to_json(data_dict):
 
 
 def main_handler():
-    url = "https://www.vagas.com.br/vagas-de-desenvolvedor-em-rio-de-janeiro"
+    url = "https://www.vagas.com.br/vagas-de-rio-de-janeiro-em-rio-de-janeiro?a%5B%5D=24&a%5B%5D=67"
     root = root_request(url)
     target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
     job_oportunities = scrape_job_info(target_links)

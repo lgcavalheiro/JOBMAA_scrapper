@@ -1,6 +1,5 @@
 import json
 import re
-import string
 from datetime import datetime
 
 
@@ -17,7 +16,7 @@ topics = [
     'LARAVEL',
     'C#',
     'NET',
-    'REACTJS',
+    'REACT JS',
     'REACT NATIVE',
     'SWIFT',
     'SCRUM',
@@ -26,7 +25,7 @@ topics = [
     'CSS',
     'JAVASCRIPT',
     'LINUX',
-    'ASPNET',
+    'ASP NET',
     'JSON',
     'XML',
     'XAMARIN',
@@ -57,6 +56,7 @@ def read_from_json():
 def assemble_analysis_object(entry, detected_topics):
     temp_info = {
         "company_name": entry["company_name"],
+        "identifier": entry["identifier"],
         "job_title": entry["job_title"],
         "job_hierarchy": entry["job_hierarchy"],
         "wage": entry["wage"],
@@ -78,7 +78,7 @@ def analyze_job_requirements(parsed_data):
         temp = json.dumps(entry["job_description"],
                           indent=4, ensure_ascii=False).upper()
         rx = re.compile('([&,.;!()\{\}])')
-        temp = rx.sub(r'', temp)
+        temp = rx.sub(r' ', temp)
         detected_topics = []
         for topic in topics:
             if topic in temp:
