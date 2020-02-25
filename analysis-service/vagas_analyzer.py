@@ -4,52 +4,11 @@ from datetime import datetime
 
 
 console_caller = '[VAGAS_ANALYZER.PY]'
-topics = [
-    ' JAVA ',
-    'RUBY',
-    'PHP',
-    'PYTHON',
-    ' C ',
-    'C++',
-    'ANGULAR',
-    'VUE',
-    'LARAVEL',
-    'C#',
-    'NET',
-    'REACT JS',
-    'REACT NATIVE',
-    'SWIFT',
-    'SCRUM',
-    'DOCKER',
-    'HTML',
-    'CSS',
-    'JAVASCRIPT',
-    'LINUX',
-    'ASP NET',
-    'JSON',
-    'XML',
-    'XAMARIN',
-    'AUTO LAYOUT',
-    'XIB',
-    'STORYBOARD',
-    "COREDATA",
-    "REST",
-    "GIT",
-    "MVP",
-    "RPA",
-    'AUTOMATION ANYWHERE',
-    'MICROSOFT SHAREPOINT',
-    'MICROSOFT FLOW',
-    "JSF",
-    "EJB",
-    "CDI",
-    "JPA",
-
-]
+topics = ''
 
 
-def read_from_json():
-    with open('[VAGAS.PY]_raw_results.json') as json_file:
+def read_from_json(file):
+    with open(file) as json_file:
         return json.load(json_file)
 
 
@@ -77,14 +36,12 @@ def analyze_job_requirements(parsed_data):
     for entry in parsed_data:
         temp = json.dumps(entry["job_description"],
                           indent=4, ensure_ascii=False).upper()
-        rx = re.compile('([&,.;!()\{\}])')
+        rx = re.compile('([&,.;!()\{\}]:)')
         temp = rx.sub(r' ', temp)
         detected_topics = []
         for topic in topics:
             if topic in temp:
                 detected_topics.append(topic)
-        """ print(temp)
-        break """
         analyzed_entries.append(
             assemble_analysis_object(entry, detected_topics))
     return analyzed_entries
@@ -96,7 +53,9 @@ def write_to_json(data_dict):
 
 
 def main_handler():
-    parsed_data = read_from_json()
+    global topics
+    topics = read_from_json('topics.json')
+    parsed_data = read_from_json('[VAGAS.PY]_raw_results.json')
     analyzed_entries = analyze_job_requirements(parsed_data)
     write_to_json(analyzed_entries)
 
