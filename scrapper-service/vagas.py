@@ -1,11 +1,8 @@
-import sys
-
 import requests
 import json
 from lxml.etree import HTML, tostring
 from lxml import etree
 from datetime import datetime
-from itertools import chain
 
 console_caller = "[VAGAS.PY]"
 
@@ -62,6 +59,10 @@ def get_benefits(root):
     return benefits
 
 
+def get_date_posted(target):
+    return target[1].replace("Publicada em ", "").strip()
+
+
 def scrape_job_info(target_links):
     job_oportunities = []
     for target in target_links:
@@ -82,6 +83,7 @@ def scrape_job_info(target_links):
             "job_description": get_description(root, '//div[@class="texto"]'),
             "job_benefits": get_benefits(root),
             "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "date_posted": get_date_posted(scrape_page(root, '//*[@id="wrapper"]/section/div/div[1]/ul/li[1]/text()')),
             "source_url": f"https://www.vagas.com.br{target}",
             "source_site": "VAGAS.COM",
         }
@@ -96,7 +98,7 @@ def scrape_job_info(target_links):
 
 
 def write_to_json(data_dict):
-    with open("results.json", "w") as outfile:
+    with open(f"{console_caller}_raw_results.json", "w") as outfile:
         json.dump(data_dict, outfile, indent=4, ensure_ascii=False)
 
 
@@ -109,4 +111,3 @@ def main_handler():
 
 
 main_handler()
-
