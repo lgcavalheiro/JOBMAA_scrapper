@@ -36,8 +36,8 @@ def analyze_job_requirements(parsed_data):
     for entry in parsed_data:
         temp = json.dumps(entry["job_description"],
                           indent=4, ensure_ascii=False).upper()
-        rx = re.compile('([&,.;!()\{\}]:)')
-        temp = rx.sub(r' ', temp)
+        #rx = re.compile('([&,.;!()\{\}]:)')
+        temp = re.sub(r' \:\,\(\)\'\"\[\]\{\}\?\; ', ' ',  temp)
         detected_topics = []
         for topic in topics:
             if topic in temp:
