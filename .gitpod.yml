@@ -3,4 +3,4 @@ vscode:
     - ms-python.python@2020.2.64397:hwGBCETiS+304zeJTipEhQ==
     - formulahendry.code-runner@0.9.16:mygIe4p5pO3AgKH5EtQiWA==
 tasks:
-  - init: python3 install numpy nltk requests lxml
+  - init: pip3 install -r requirements.txt
