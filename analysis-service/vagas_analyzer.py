@@ -48,8 +48,13 @@ def analyze_job_requirements(parsed_data):
         temp = re.sub(r' \:\,\(\)\'\"\[\]\{\}\?\; ', ' ',  temp)
         detected_topics = []
         for topic in topics:
-            if topic in temp:
-                detected_topics.append(topic)
+            if type(topic) is dict:
+                for t in topic:
+                    if t in temp:
+                        detected_topics.append(list(topic.keys())[0])
+            else:
+                if topic in temp:
+                    detected_topics.append(topic)
         detected_topics = format_entry(detected_topics)
         # print(detected_topics)
         analyzed_entries.append(
@@ -92,6 +97,13 @@ def format_entry(analyzed_entries):
 
     if 'SQL' in realtrueentries and 'SQL SERVER' in realtrueentries:
         realtrueentries.remove('SQL')
+
+    if ' R ' in realtrueentries and 'R $' in realtrueentries:
+        realtrueentries.remove(' R ')
+        realtrueentries.remove('R $')
+
+    if 'R $' in realtrueentries:
+        realtrueentries.remove('R $')
 
     return list(realtrueentries)
 
