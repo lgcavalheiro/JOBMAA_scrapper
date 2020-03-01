@@ -46,6 +46,7 @@ def analyze_job_requirements(parsed_data):
         temp = filter_chunks(temp)
         temp = str(stringify_chunks(temp))
         temp = re.sub(r' \:\,\(\)\'\"\[\]\{\}\?\; ', ' ',  temp)
+        #temp = temp.replace('C', 'ÇÇKZU')
         detected_topics = []
         for topic in topics:
             if type(topic) is dict:
@@ -56,10 +57,9 @@ def analyze_job_requirements(parsed_data):
                 if topic in temp:
                     detected_topics.append(topic)
         detected_topics = format_entry(detected_topics)
-        # print(detected_topics)
-        analyzed_entries.append(
-            assemble_analysis_object(entry, detected_topics))
-        # break
+        if len(detected_topics) > 0:
+            analyzed_entries.append(
+                assemble_analysis_object(entry, detected_topics))
     return analyzed_entries
 
 
@@ -89,11 +89,11 @@ def format_entry(analyzed_entries):
 
     realtrueentries = set(realtrueentries)
 
-    if 'C ' in realtrueentries and 'C #' in realtrueentries:
+    """ if 'C ' in realtrueentries and 'C #' in realtrueentries:
         realtrueentries.remove('C ')
 
     if 'C ' in realtrueentries and 'IONIC' in realtrueentries:
-        realtrueentries.remove('C ')
+        realtrueentries.remove('C ') """
 
     if 'SQL' in realtrueentries and 'SQL SERVER' in realtrueentries:
         realtrueentries.remove('SQL')
