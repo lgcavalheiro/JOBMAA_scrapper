@@ -95,7 +95,6 @@ def scrape_job_info(target_links):
             temp_info[value] = temp_info[value].replace(
                 "\n", "").replace("\r", "").strip()
         job_oportunities.append(temp_info)
-        # break
     return job_oportunities
 
 

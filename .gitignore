@@ -131,3 +131,4 @@ dmypy.json
 # Misc
 \[VAGAS_ANALYZER.PY\]_analyzed_results.json
 \[VAGAS.PY\]_raw_results.json
+analyzed_results.json

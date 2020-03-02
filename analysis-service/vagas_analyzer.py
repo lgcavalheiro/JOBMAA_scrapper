@@ -5,6 +5,7 @@ import numpy
 import json
 import re
 import nltk
+from tinydb import TinyDB, Query
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
@@ -37,26 +38,35 @@ def assemble_analysis_object(entry, detected_topics):
     return temp_info
 
 
+def process_entry(entry):
+    temp = json.dumps(entry["job_description"],
+                      indent=4, ensure_ascii=False).upper()
+    temp = pre_process(temp)
+    temp = filter_chunks(temp)
+    temp = str(stringify_chunks(temp))
+    temp = re.sub(r' \:\,\(\)\'\"\[\]\{\}\?\; ', ' ',  temp)
+    return temp
+
+
+def detect_topics(processed_entry):
+    detected_topics = []
+    for topic in topics:
+        if type(topic) is dict:
+            for subtopic in topic:
+                if subtopic in processed_entry:
+                    detected_topics.append(list(topic.keys())[0])
+        else:
+            if topic in processed_entry:
+                detected_topics.append(topic)
+    detected_topics = format_entry(detected_topics)
+    return detected_topics
+
+
 def analyze_job_requirements(parsed_data):
     analyzed_entries = []
     for entry in parsed_data:
-        temp = json.dumps(entry["job_description"],
-                          indent=4, ensure_ascii=False).upper()
-        temp = pre_process(temp)
-        temp = filter_chunks(temp)
-        temp = str(stringify_chunks(temp))
-        temp = re.sub(r' \:\,\(\)\'\"\[\]\{\}\?\; ', ' ',  temp)
-        #temp = temp.replace('C', 'ÇÇKZU')
-        detected_topics = []
-        for topic in topics:
-            if type(topic) is dict:
-                for t in topic:
-                    if t in temp:
-                        detected_topics.append(list(topic.keys())[0])
-            else:
-                if topic in temp:
-                    detected_topics.append(topic)
-        detected_topics = format_entry(detected_topics)
+        processed_entry = process_entry(entry)
+        detected_topics = detect_topics(processed_entry)
         if len(detected_topics) > 0:
             analyzed_entries.append(
                 assemble_analysis_object(entry, detected_topics))
@@ -64,48 +74,27 @@ def analyze_job_requirements(parsed_data):
 
 
 def format_entry(analyzed_entries):
-    trueentries = analyzed_entries
-    """ for a in analyzed_entries:
-        if len(a) > 0:
-            trueentries.append(a) """
-
-    realtrueentries = analyzed_entries
-    """ for e in trueentries:
-        if len(e) > 1:
-            for i in e:
-                realtrueentries.append(str(i).replace(
-                    '[', '').replace(']', '').replace('\'', ''))
-        else:
-            realtrueentries.append(str(e).replace(
-                '[', '').replace(']', '').replace('\'', '')) """
-
-    if 'JAVA' in realtrueentries:
+    if 'JAVA' in analyzed_entries:
         ct = 0
-        for word in realtrueentries:
+        for word in analyzed_entries:
             if 'JAVA' in word:
                 ct += 1
         if ct >= 2:
-            realtrueentries.remove('JAVA')
+            analyzed_entries.remove('JAVA')
 
-    realtrueentries = set(realtrueentries)
+    analyzed_entries = set(analyzed_entries)
 
-    """ if 'C ' in realtrueentries and 'C #' in realtrueentries:
-        realtrueentries.remove('C ')
+    if 'SQL' in analyzed_entries and 'SQL SERVER' in analyzed_entries:
+        analyzed_entries.remove('SQL')
 
-    if 'C ' in realtrueentries and 'IONIC' in realtrueentries:
-        realtrueentries.remove('C ') """
+    if ' R ' in analyzed_entries and 'R $' in analyzed_entries:
+        analyzed_entries.remove(' R ')
+        analyzed_entries.remove('R $')
 
-    if 'SQL' in realtrueentries and 'SQL SERVER' in realtrueentries:
-        realtrueentries.remove('SQL')
+    if 'R $' in analyzed_entries:
+        analyzed_entries.remove('R $')
 
-    if ' R ' in realtrueentries and 'R $' in realtrueentries:
-        realtrueentries.remove(' R ')
-        realtrueentries.remove('R $')
-
-    if 'R $' in realtrueentries:
-        realtrueentries.remove('R $')
-
-    return list(realtrueentries)
+    return list(analyzed_entries)
 
 
 def write_to_json(data_dict):
@@ -149,12 +138,23 @@ def stringify_chunks(data):
     return finalstring
 
 
+def insert_db(data):
+    db = TinyDB('analyzed_results.json')
+    Entry = Query()
+    for entry in data:
+        if db.search(Entry.identifier == entry['identifier']):
+            pass
+        else:
+            db.insert(entry)
+
+
 def main_handler():
     global topics
     topics = read_from_json('topics.json')
     parsed_data = read_from_json('[VAGAS.PY]_raw_results.json')
     analyzed_entries = analyze_job_requirements(parsed_data)
-    write_to_json(analyzed_entries)
+    insert_db(analyzed_entries)
+    # write_to_json(analyzed_entries)
 
 
 main_handler()
