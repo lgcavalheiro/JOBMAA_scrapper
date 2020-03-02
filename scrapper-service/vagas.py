@@ -1,8 +1,8 @@
 import requests
-import json
 from lxml.etree import HTML, tostring
 from lxml import etree
 from datetime import datetime
+from tinydb import TinyDB, Query
 
 console_caller = "[VAGAS.PY]"
 
@@ -10,6 +10,8 @@ console_caller = "[VAGAS.PY]"
 def root_request(url):
     r = requests.get(url)
     print(f"{console_caller} Requested: {r.url} - Status code: {r.status_code}")
+    if r.status_code != 200:
+        return None
     root = HTML(r.content)
     return root
 
@@ -67,6 +69,8 @@ def scrape_job_info(target_links):
     job_oportunities = []
     for target in target_links:
         root = root_request(f"https://www.vagas.com.br{target}")
+        if root == None:
+            continue
         temp_info = {
             "company_name": scrape_page(
                 root, '//h2[@class="job-shortdescription__company"]/text()'
@@ -98,9 +102,16 @@ def scrape_job_info(target_links):
     return job_oportunities
 
 
-def write_to_json(data_dict):
-    with open(f"{console_caller}_raw_results.json", "w") as outfile:
-        json.dump(data_dict, outfile, indent=4, ensure_ascii=False)
+def insert_db(data):
+    db = TinyDB(console_caller + '_raw_results.json')
+    Entry = Query()
+    for entry in data:
+        if db.search(Entry.identifier == entry['identifier']):
+            pass
+        else:
+            print(
+                f"{console_caller} New insert made: {entry['job_title']} - {entry['identifier']}")
+            db.insert(entry)
 
 
 def main_handler():
@@ -108,7 +119,7 @@ def main_handler():
     root = root_request(url)
     target_links = scrape_page(root, '//a[@class="link-detalhes-vaga"]/@href')
     job_oportunities = scrape_job_info(target_links)
-    write_to_json(job_oportunities)
+    insert_db(job_oportunities)
 
 
 main_handler()

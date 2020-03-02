@@ -1,6 +1,6 @@
 from datetime import datetime
 from nltk.tag import pos_tag
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import word_tokenize
 import numpy
 import json
 import re
@@ -12,11 +12,6 @@ nltk.download('averaged_perceptron_tagger')
 
 console_caller = '[VAGAS_ANALYZER.PY]'
 topics = ''
-
-
-def read_from_json(file):
-    with open(file) as json_file:
-        return json.load(json_file)
 
 
 def assemble_analysis_object(entry, detected_topics):
@@ -39,8 +34,9 @@ def assemble_analysis_object(entry, detected_topics):
 
 
 def process_entry(entry):
-    temp = json.dumps(entry["job_description"],
-                      indent=4, ensure_ascii=False).upper()
+    temp = entry['job_description'].upper()
+    """ temp = json.dumps(entry["job_description"],
+                      indent=4, ensure_ascii=False).upper() """
     temp = pre_process(temp)
     temp = filter_chunks(temp)
     temp = str(stringify_chunks(temp))
@@ -97,11 +93,6 @@ def format_entry(analyzed_entries):
     return list(analyzed_entries)
 
 
-def write_to_json(data_dict):
-    with open(f"{console_caller}_analyzed_results.json", "w") as outfile:
-        json.dump(data_dict, outfile, indent=4, ensure_ascii=False)
-
-
 def pre_process(sent):
     sent = nltk.word_tokenize(sent)
     sent = nltk.pos_tag(sent)
@@ -139,22 +130,33 @@ def stringify_chunks(data):
 
 
 def insert_db(data):
-    db = TinyDB('analyzed_results.json')
+    db = TinyDB(console_caller+'_analyzed_results.json')
     Entry = Query()
     for entry in data:
         if db.search(Entry.identifier == entry['identifier']):
             pass
         else:
+            print(
+                f"{console_caller} New insert made: {entry['job_title']} - {entry['identifier']}")
             db.insert(entry)
+
+
+def read_from_db(dbname):
+    db = TinyDB(dbname)
+    return db.all()
+
+
+def read_from_json(file):
+    with open(file) as json_file:
+        return json.load(json_file)
 
 
 def main_handler():
     global topics
     topics = read_from_json('topics.json')
-    parsed_data = read_from_json('[VAGAS.PY]_raw_results.json')
+    parsed_data = read_from_db('[VAGAS.PY]_raw_results.json')
     analyzed_entries = analyze_job_requirements(parsed_data)
     insert_db(analyzed_entries)
-    # write_to_json(analyzed_entries)
 
 
 main_handler()
