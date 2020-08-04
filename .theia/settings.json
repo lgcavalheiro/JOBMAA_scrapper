@@ -6,7 +6,7 @@
     "editor.fontFamily": "Source Code Pro",
     "terminal.integrated.fontSize": 16,
     "terminal.integrated.fontWeight": "600",
-    "python.pythonPath": "/home/gitpod/.pyenv/versions/3.7.6/bin/python",
+    "python.pythonPath": "/home/gitpod/.pyenv/versions/3.8.3/bin/python",
     "python.formatting.provider": "autopep8",
     "editor.formatOnSave": true,
     "python.linting.enabled": true,
