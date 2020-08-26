@@ -11,5 +11,7 @@ class VagasApiTests(unittest.TestCase):
         return super().tearDown()
 
     def test_vagas_api_credentials(self):
-        self.assertGreater(len(self.api_url),  0, 'Api_url not supplied!')
-        self.assertGreater(len(self.options), 0, 'Options not supplied!')
+        with self.subTest():
+            self.assertGreater(len(self.api_url),  0, 'Api_url not supplied!')
+        with self.subTest():
+            self.assertGreater(len(self.options), 0, 'Options not supplied!')
