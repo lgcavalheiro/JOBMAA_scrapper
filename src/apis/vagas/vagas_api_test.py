@@ -18,5 +18,8 @@ class VagasApiTests(TestCase):
         self.assertGreater(len(self.options), 0, 'Options not supplied!')
 
     def test_get_request(self):
-        VA.request_data = MagicMock(return_value=3)
-        self.assertEqual(3, VA.request_data(self.api_url, self.options))
+        mock_request_data = create_autospec(VA.request_data, return_value='ok')
+        JU.write_json = MagicMock(return_value=3)
+        mock_request_data(self.api_url, self.options)
+        mock_request_data.assert_called_with(self.api_url, self.options)
+        self.assertEqual(3, mock_request_data.call_count)
