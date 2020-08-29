@@ -3,3 +3,4 @@ requests
 numpy
 nltk
 tinydb
+scrapy
