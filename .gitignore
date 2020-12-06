@@ -1,5 +1,5 @@
 # Project specific
-src/results/*
+results
 src/__pycache__/
 
 # Byte-compiled / optimized / DLL files
