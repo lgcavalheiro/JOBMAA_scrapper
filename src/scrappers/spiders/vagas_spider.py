@@ -32,12 +32,19 @@ class VagasSpider(scrapy.Spider):
             return [re.sub(r'[\n\r\xa0]', '', t).strip() for t in response.css('div.infoVaga span::text').getall()][1:]
 
         def get_job_publish_date():
-            date = response.css('li.job-breadcrumb__item--published *::text').getall()[
-                1].replace('\n', '').strip().split()[-1]
-            if(date == 'ontem'):
-                return (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
-            else:
-                return date
+            try:
+                raw_date = response.css(
+                    'li.job-breadcrumb__item--published *::text').getall()[1]
+                date = raw_date.replace('\n', '').strip().split()[-1]
+                if(date == 'ontem'):
+                    return (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
+                elif(date == 'dias'):
+                    date = raw_date.replace('\n', '').strip().split()[-2]
+                    return (datetime.now() - timedelta(days=int(date))).strftime("%d/%m/%Y")
+                else:
+                    return date
+            except:
+                return '[DATA PROCESS ERROR] @ get_job_publish_date'
 
         wage, location = get_job_wage_and_location()
 
