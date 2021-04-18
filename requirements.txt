@@ -1,4 +1,3 @@
-nltk
 scrapy
 pylint
 autopep8
