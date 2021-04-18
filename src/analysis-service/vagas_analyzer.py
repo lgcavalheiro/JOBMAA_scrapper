@@ -6,7 +6,7 @@ import json
 import re
 import nltk
 from tinydb import TinyDB, Query
-from utils.json_utils import JsonUtils as JU
+from ..utils.json_utils import JsonUtils as JU
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
