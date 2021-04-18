@@ -1,34 +1,30 @@
 from datetime import datetime
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-import numpy
 import json
 import re
 import nltk
-from tinydb import TinyDB, Query
+from ..utils.json_utils import JsonUtils as JU
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
-
-
-console_caller = '[VAGAS_ANALYZER.PY]'
-topics = ''
 
 
 def assemble_analysis_object(entry, detected_topics):
     temp_info = {
         "company_name": entry["company_name"],
-        "identifier": entry["identifier"],
+        "source_id": entry["source_id"],
         "job_title": entry["job_title"],
-        "job_hierarchy": entry["job_hierarchy"],
+        "hierarchy": entry["hierarchy"],
         "wage": entry["wage"],
         "location": entry["location"],
         "detected_topics": detected_topics,
         "job_benefits": entry["job_benefits"],
-        "timestamp": entry["timestamp"],
         "analysis_timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        "date_posted": entry["date_posted"],
-        "source_url": entry["source_url"],
+        "publish_date": entry["publish_date"],
+        "job_url": entry["job_url"],
         "source_site": "VAGAS.COM",
+        "company_info": entry["company_info"],
+        "extraction_timestamp": entry["extraction_timestamp"]
     }
     return temp_info
 
@@ -129,34 +125,10 @@ def stringify_chunks(data):
     return finalstring
 
 
-def insert_db(data):
-    db = TinyDB(console_caller+'_analyzed_results.json')
-    Entry = Query()
-    for entry in data:
-        if db.search(Entry.identifier == entry['identifier']):
-            pass
-        else:
-            print(
-                f"{console_caller} New insert made: {entry['job_title']} - {entry['identifier']}")
-            db.insert(entry)
-
-
-def read_from_db(dbname):
-    db = TinyDB(dbname)
-    return db.all()
-
-
-def read_from_json(file):
-    with open(file) as json_file:
-        return json.load(json_file)
-
-
-def main_handler():
-    global topics
-    topics = read_from_json('topics.json')
-    parsed_data = read_from_db('[VAGAS.PY]_raw_results.json')
+if(__name__ == "__main__"):
+    console_caller = '[VAGAS_ANALYZER.PY]'
+    topics = JU.read_json('topics.json')
+    parsed_data = JU.read_json('results/vagas_spider_raw_results.json')
     analyzed_entries = analyze_job_requirements(parsed_data)
-    insert_db(analyzed_entries)
-
-
-main_handler()
+    JU.write_json(f"results/{console_caller}_analyzed_results.json",
+                  analyzed_entries, 'w')
