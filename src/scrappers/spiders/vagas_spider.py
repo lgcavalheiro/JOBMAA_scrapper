@@ -29,7 +29,22 @@ class VagasSpider(scrapy.Spider):
             return ' '.join([re.sub(r'[\n\r\xa0]', '', node).strip() for node in response.css(selector).getall()]).strip()
 
         def get_job_wage_and_location():
-            return [re.sub(r'[\n\r\xa0]', '', t).strip() for t in response.css('div.infoVaga span::text').getall()][1:]
+            try:
+                info_vaga = response.css('div.infoVaga li')
+                span_text = info_vaga.css('span::text').getall()
+                if(len(span_text) == 3):
+                    return [re.sub(r'[\n\r\xa0]', '', t).strip() for t in span_text][1:]
+                else:
+                    b_text = [re.sub(r'[\n\r\xa0]', '', t).strip()
+                              for t in info_vaga.css('b::text').getall()]
+                    if(len(b_text) > 1):
+                        wage = b_text[0] + ' a ' + b_text[1]
+                    else:
+                        wage = b_text[0]
+                    location = re.sub(r'[\n\r\xa0]', '', span_text[-1]).strip()
+                    return [wage, location]
+            except:
+                return ['[DATA PROCESS ERROR] @ get_job_wage_and_location', '[DATA PROCESS ERROR] @ get_job_wage_and_location']
 
         def get_job_publish_date():
             try:
