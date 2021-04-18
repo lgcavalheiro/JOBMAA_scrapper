@@ -128,7 +128,7 @@ def stringify_chunks(data):
 if(__name__ == "__main__"):
     console_caller = '[VAGAS_ANALYZER.PY]'
     topics = JU.read_json('topics.json')
-    parsed_data = JU.read_json('results/vagas_spider_raw_results.json')
+    parsed_data = JU.read_json('../results/vagas_spider_raw_results.json')
     analyzed_entries = analyze_job_requirements(parsed_data)
-    JU.write_json(f"results/{console_caller}_analyzed_results.json",
+    JU.write_json(f"../results/{console_caller}_analyzed_results.json",
                   analyzed_entries, 'w')
