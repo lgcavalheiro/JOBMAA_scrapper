@@ -1,6 +1,7 @@
 # Project specific
 src/__pycache__/
 .vscode
+local_db/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
