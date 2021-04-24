@@ -62,9 +62,10 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'scrappers.pipelines.ScrappersPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    # 'scrappers.pipelines.ScrappersPipeline': 300,
+    'scrappers.pipelines.PostgresPipeline': 100
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +89,7 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 FEED_EXPORT_ENCODING = 'utf-8'
+
+LOG_LEVEL = 'WARNING'
+
+#LOG_FILE = 'logfile.log'

@@ -33,8 +33,9 @@ class VagasSpider(scrapy.Spider):
                 if(shouldStringify):
                     return ' '.join(data)
                 return data
-            except:
-                return '[DATA PROCESS ERROR] @ get_job_info'
+            except Exception as e:
+                raise Exception(e)
+                # return '[DATA PROCESS ERROR] @ get_job_info'
 
         def get_job_wage_and_location():
             try:
@@ -51,8 +52,9 @@ class VagasSpider(scrapy.Spider):
                         wage = b_text[0]
                     location = re.sub(r'[\n\r\xa0]', '', span_text[-1]).strip()
                     return [wage, location]
-            except:
-                return ['[DATA PROCESS ERROR] @ get_job_wage_and_location', '[DATA PROCESS ERROR] @ get_job_wage_and_location']
+            except Exception as e:
+                raise Exception(e)
+                # return ['[DATA PROCESS ERROR] @ get_job_wage_and_location', '[DATA PROCESS ERROR] @ get_job_wage_and_location']
 
         def get_job_publish_date():
             try:
@@ -60,16 +62,17 @@ class VagasSpider(scrapy.Spider):
                     'li.job-breadcrumb__item--published *::text').getall()[1]
                 date = raw_date.replace('\n', '').strip().split()[-1]
                 if(date == 'hoje'):
-                    return datetime.now().strftime("%d/%m/%Y")
+                    return datetime.now()
                 elif(date == 'ontem'):
-                    return (datetime.now() - timedelta(days=1)).strftime("%d/%m/%Y")
+                    return (datetime.now() - timedelta(days=1))
                 elif(date == 'dias'):
                     date = raw_date.replace('\n', '').strip().split()[-2]
-                    return (datetime.now() - timedelta(days=int(date))).strftime("%d/%m/%Y")
+                    return (datetime.now() - timedelta(days=int(date)))
                 else:
-                    return date
-            except:
-                return '[DATA PROCESS ERROR] @ get_job_publish_date'
+                    return datetime.strptime(date, "%d/%m/%Y")
+            except Exception as e:
+                raise Exception(e)
+                # return '[DATA PROCESS ERROR] @ get_job_publish_date'
 
         wage, location = get_job_wage_and_location()
         hierarchy = get_job_info('span.job-hierarchylist__item span::text')
@@ -92,6 +95,6 @@ class VagasSpider(scrapy.Spider):
             "BENEFITS": get_job_info('li.job-benefits__list-item span::text', False),
             "DESCRIPTION": description,
             "COMPANY_INFO": get_job_info('div[data-testid=JobCompanyPresentation] *::text'),
-            "EXTRACTION_TIMESTAMP": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "EXTRACTION_TIMESTAMP": datetime.now(),
             "SOURCE": "vagas.com"
         }
