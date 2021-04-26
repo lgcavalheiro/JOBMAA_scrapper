@@ -5,40 +5,48 @@
 
 
 # useful for handling different item types with a single interface
-#from itemadapter import ItemAdapter
+from itemadapter import ItemAdapter
+from scrapy.exceptions import DropItem
+from .utils.db_utils import SQLiteConnector, PostgreConnector
 from datetime import datetime
-import psycopg2
+
+DB_literals = {
+    'POSTGRE': PostgreConnector,
+    'SQLITE': SQLiteConnector
+}
 
 
-class ScrappersPipeline:
-    def process_item(self, item, spider):
-        return item
+class DatabasePipeline(object):
+    @classmethod
+    def from_crawler(cls, crawler):
+        try:
+            DBCON = crawler.settings.attributes.get('DBCON').value
+            LOG_FILE = crawler.settings.attributes.get('LOG_FILE').value
+        except Exception as e:
+            print(f'ERROR WHILE EXTRACTING SETTINGS: {e}')
+            DBCON = 'SQLITE'
+            LOG_FILE = 'error.log'
+        return cls(LOG_FILE, DBCON)
 
+    def __init__(self, LOG_FILE, DBCON):
+        self.__connector_class = DB_literals[DBCON]
+        open(LOG_FILE, 'w').close()
 
-class PostgresPipeline(object):
     def open_spider(self, spider):
-        self.con = psycopg2.connect(
-            host='localhost', database='JOBMAA', user='postgres', password='docker')
-        self.cursor = self.con.cursor()
-        open('./postgre_errors.log', 'w').close()
+        self.__connector = self.__connector_class()
 
     def close_spider(self, spider):
-        self.con.close()
+        self.__connector.close_connection()
 
     def process_item(self, item, spider):
-        try:
-            self.cursor.execute(f'''
-                INSERT INTO 
-                    RAW_DATA ({', '.join([key for key in list(item.keys())])})
-                VALUES
-                    (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT DO NOTHING;
-            ''', list(item.values()))
-            self.con.commit()
-        except Exception as e:
-            self.con.rollback()
-            with open('./postgre_errors.log', 'a') as file:
-                file.write(f'{datetime.now()} --- {e} --- {item}')
-                file.close()
-
-        return item
+        adapter = ItemAdapter(item)
+        hasError = False
+        for val in adapter.values():
+            if('DATA PROCESS ERROR' in str(val)):
+                hasError = True
+                msg = f"Data process error found @ {adapter['SOURCE_ID']}-{adapter['JOB_HASH']}"
+                print(msg)
+                raise DropItem(msg)
+        if(not hasError):
+            self.__connector.run_query(item)
+            return item

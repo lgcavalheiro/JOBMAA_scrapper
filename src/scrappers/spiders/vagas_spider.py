@@ -19,7 +19,7 @@ class VagasSpider(scrapy.Spider):
         self.links.extend(partial_links)
         next_page = response.css('a.btMaisVagas::attr(data-url)').extract()
 
-        if len(next_page) is not 0:
+        if len(next_page) != 0:
             next_page = f'https://www.vagas.com.br{next_page[0]}'
             yield response.follow(next_page, callback=self.parse)
         else:
@@ -33,9 +33,8 @@ class VagasSpider(scrapy.Spider):
                 if(shouldStringify):
                     return ' '.join(data)
                 return data
-            except Exception as e:
-                raise Exception(e)
-                # return '[DATA PROCESS ERROR] @ get_job_info'
+            except:
+                return 'DATA PROCESS ERROR'
 
         def get_job_wage_and_location():
             try:
@@ -52,9 +51,8 @@ class VagasSpider(scrapy.Spider):
                         wage = b_text[0]
                     location = re.sub(r'[\n\r\xa0]', '', span_text[-1]).strip()
                     return [wage, location]
-            except Exception as e:
-                raise Exception(e)
-                # return ['[DATA PROCESS ERROR] @ get_job_wage_and_location', '[DATA PROCESS ERROR] @ get_job_wage_and_location']
+            except:
+                return ['DATA PROCESS ERROR', 'DATA PROCESS ERROR']
 
         def get_job_publish_date():
             try:
@@ -70,9 +68,8 @@ class VagasSpider(scrapy.Spider):
                     return (datetime.now() - timedelta(days=int(date)))
                 else:
                     return datetime.strptime(date, "%d/%m/%Y")
-            except Exception as e:
-                raise Exception(e)
-                # return '[DATA PROCESS ERROR] @ get_job_publish_date'
+            except:
+                return 'DATA PROCESS ERROR'
 
         wage, location = get_job_wage_and_location()
         hierarchy = get_job_info('span.job-hierarchylist__item span::text')

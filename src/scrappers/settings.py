@@ -7,11 +7,16 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+FEED_EXPORT_ENCODING = 'utf-8'
+
+LOG_LEVEL = 'WARNING'
+
+LOG_FILE = 'error.log'
+
 BOT_NAME = 'scrappers'
 
 SPIDER_MODULES = ['scrappers.spiders']
 NEWSPIDER_MODULE = 'scrappers.spiders'
-
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'scrappers (+http://www.yourdomain.com)'
@@ -63,8 +68,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'scrappers.pipelines.ScrappersPipeline': 300,
-    'scrappers.pipelines.PostgresPipeline': 100
+    'scrappers.pipelines.DatabasePipeline': 100
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -87,9 +91,3 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-FEED_EXPORT_ENCODING = 'utf-8'
-
-LOG_LEVEL = 'WARNING'
-
-#LOG_FILE = 'logfile.log'
