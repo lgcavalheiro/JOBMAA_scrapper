@@ -34,7 +34,7 @@ class PostgreConnector():
 class SQLiteConnector():
     def __init__(self):
         open('./sqlite3_errors.log', 'w').close()
-        self.__con = sqlite3.connect('vagas_raw.db')
+        self.__con = sqlite3.connect('vagas_raw2.db')
         self.__cursor = self.__con.cursor()
         self.__cursor.execute('''
             CREATE TABLE IF NOT EXISTS RAW_DATA(
@@ -42,7 +42,7 @@ class SQLiteConnector():
                 SOURCE_ID VARCHAR(32) NOT NULL UNIQUE,
                 HIERARCHY VARCHAR(64) NOT NULL,
                 TITLE VARCHAR(256) NOT NULL,
-                WAGE VARCHAR(32),
+                WAGE TEXT,
                 LOCATION VARCHAR(32),
                 DESCRIPTION TEXT NOT NULL,
                 BENEFITS TEXT,

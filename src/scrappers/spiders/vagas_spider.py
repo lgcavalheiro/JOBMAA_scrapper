@@ -41,18 +41,20 @@ class VagasSpider(scrapy.Spider):
                 info_vaga = response.css('div.infoVaga li')
                 span_text = info_vaga.css('span::text').getall()
                 if(len(span_text) == 3):
-                    return [re.sub(r'[\n\r\xa0]', '', t).strip() for t in span_text][1:]
+                    temp = [re.sub(r'[\n\r\xa0]', '', t).strip()
+                            for t in span_text][1:]
+                    return [[temp[0]], temp[1]]
                 else:
                     b_text = [re.sub(r'[\n\r\xa0]', '', t).strip()
                               for t in info_vaga.css('b::text').getall()]
                     if(len(b_text) > 1):
-                        wage = b_text[0] + ' a ' + b_text[1]
+                        wage = [b_text[0], b_text[1]]
                     else:
-                        wage = b_text[0]
+                        wage = [b_text[0]]
                     location = re.sub(r'[\n\r\xa0]', '', span_text[-1]).strip()
                     return [wage, location]
             except:
-                return ['DATA PROCESS ERROR', 'DATA PROCESS ERROR']
+                return [['DATA PROCESS ERROR'], 'DATA PROCESS ERROR']
 
         def get_job_publish_date():
             try:
